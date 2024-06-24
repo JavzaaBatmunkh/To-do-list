@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My To Do List</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+   
+    <style>
+      .label{
+        display: flex;
+        justify-content: space-between;
+      }
+      .card{margin-bottom: 25px;}
+      .notification{display:flex; justify-content: space-between; align-items: center;}
+      .box{width: 100px; font-weight: 900; font-size: 40px ;}
+      
+    </style>
+  </head>
+  <body>
+    <div class="container is-max-desktop">
+      <div class="notification is-primary has-background-link">
+        <h1 class="title is-1 has-text-centered">My To Do List</h1>
+        <div class="box" id="box"></div>
+      </div>
+      <div class="control">
+        <input
+          class="input is-focused is-large"
+          type="text"
+          placeholder="What next?"
+          id="input"
+          onkeydown="addOnEnter(event)"
+        />
+      </div>
+      <div class="buttons is-justify-content-center">
+        <button class="button is-link mt-3 is-focused is-medium is-responsive" onclick="addTask()">Add Task</button>
+      </div>
+      <div id="content">
+      </div>
+
+
+    <script>
+      const tasksString=localStorage.getItem("Tasks")
+      const tasks=JSON.parse(tasksString) || []
+      
+      const content = document.getElementById("content");
+      render();
+      function addTask() {
+        const input = document.getElementById("input").value;
+        if (input===""){
+          alert("Enter task in the input section!")
+          return
+        }
+        tasks.push({name: input, status: 'todo'})
+        document.getElementById("input").value=""
+        render()
+      }
+
+      function render(){
+        console.log(tasks)
+        let tasksHtml=""
+        for(let i=0; i<tasks.length; i++){
+          const oneTask=`          
+          <div class="card">
+          <div class="card-content">
+            <div class="content">
+              <label class="checkbox label">
+                <div class="container-input">
+                  <input onclick="toggleTask(${i});" type="checkbox" class="checkbox" ${tasks[i].status==="done" ? "checked": ""} />
+                  ${tasks[i].status==="done" ? `<s>${tasks[i].name}</s>`: `${tasks[i].name}`}
+                        
+                </div>
+                <div class="buttons">
+                    <button class="button is-small is-danger is-outlined" onclick="deleteTask(${i})">Delete</button>
+                    <button class="button is-small is-success is-outlined" onclick="editTask(${i})">Edit</button>
+                </div>
+              </label> 
+            </div>
+          </div>
+        </div>`
+        tasksHtml+=oneTask
+        }
+      document.getElementById("content").innerHTML=tasksHtml
+
+      let count=0
+        for(let i=0; i<tasks.length;i++){
+          if(tasks[i].status==="done"){
+            count++
+          }
+        }
+        document.getElementById("box").innerHTML= `${count}/${tasks.length}`
+        localStorage.setItem("Tasks", JSON.stringify(tasks))
+      }
+ 
+      function deleteTask(position){
+        if(confirm("Are you sure to delete the task?")){
+          tasks.splice(position,1)
+          render()
+        }
+      }
+
+      function editTask(position){
+        const name=prompt("Edit task", tasks[position].name)
+        if (name===null){}
+        else{tasks[position].name=name}  
+        render()
+      }
+
+      function toggleTask(position){
+        if (tasks[position].status==="done"){
+          tasks[position].status="todo" 
+        }
+        else{
+          tasks[position].status="done"
+        }
+        render();
+      }
+
+      function addOnEnter(event){
+        if (event.key === "Enter"){
+          addTask()
+        }
+      }
+
+     
+    </script>
+  </body>
+</html>
